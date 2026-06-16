@@ -31,4 +31,32 @@
   .badge {
     @apply inline-block text-xs px-2 py-0.5 rounded-full font-medium;
   }
+
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-2 md:hidden;
+  }
+  .bottom-nav-item {
+    @apply flex flex-col items-center text-xs text-gray-500 hover:text-masjid-600 transition-colors;
+  }
+  .bottom-nav-item-active {
+    @apply text-masjid-600 font-medium;
+  }
+
+  /* Sidebar responsif */
+  .sidebar {
+    @apply w-52 bg-white border-r border-gray-100 flex flex-col flex-shrink-0;
+  }
+  @media (max-width: 768px) {
+    .sidebar {
+      @apply w-full h-auto border-b;
+    }
+    .nav-link {
+      @apply flex-1 text-center;
+    }
+  }
+
+  /* Main content */
+  .main-content {
+    @apply flex-1 overflow-y-auto;
+  }
 }
