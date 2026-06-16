@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react'
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import React from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
+import Kalender from './pages/Kalender'
 import Kegiatan from './pages/Kegiatan'
 import Ruangan from './pages/Ruangan'
 import Pemesanan from './pages/Pemesanan'
@@ -23,6 +24,7 @@ export default function App() {
       <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="kalender" element={<Kalender />} />
         <Route path="kegiatan" element={<Kegiatan />} />
         <Route path="ruangan" element={<Ruangan />} />
         <Route path="pemesanan" element={<Pemesanan />} />

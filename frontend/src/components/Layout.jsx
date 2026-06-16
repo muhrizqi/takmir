@@ -1,18 +1,19 @@
 import React from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, Calendar, DoorOpen, ClipboardList,
+  LayoutDashboard, Calendar, CalendarDays, DoorOpen, ClipboardList,
   Wallet, Megaphone, Users, LogOut, Building2
 } from 'lucide-react'
 
 const navItems = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/kegiatan',  icon: Calendar,         label: 'Kegiatan' },
-  { to: '/ruangan',   icon: DoorOpen,          label: 'Ruangan' },
-  { to: '/pemesanan', icon: ClipboardList,      label: 'Pemesanan' },
-  { to: '/keuangan',  icon: Wallet,             label: 'Keuangan' },
-  { to: '/pengumuman',icon: Megaphone,          label: 'Pengumuman' },
-  { to: '/pengurus',  icon: Users,              label: 'Pengurus & Biro' },
+  { to: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/kalender',   icon: CalendarDays,    label: 'Kalender' },
+  { to: '/kegiatan',   icon: Calendar,        label: 'Kegiatan' },
+  { to: '/ruangan',    icon: DoorOpen,        label: 'Ruangan' },
+  { to: '/pemesanan',  icon: ClipboardList,   label: 'Pemesanan' },
+  { to: '/keuangan',   icon: Wallet,          label: 'Keuangan' },
+  { to: '/pengumuman', icon: Megaphone,       label: 'Pengumuman' },
+  { to: '/pengurus',   icon: Users,           label: 'Pengurus & Biro' },
 ]
 
 export default function Layout() {
@@ -27,7 +28,6 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
-      {/* Sidebar */}
       <aside className="w-52 bg-white border-r border-gray-100 flex flex-col flex-shrink-0">
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center gap-2">
@@ -74,7 +74,6 @@ export default function Layout() {
         </div>
       </aside>
 
-      {/* Main content */}
       <main className="flex-1 overflow-y-auto">
         <Outlet />
       </main>
