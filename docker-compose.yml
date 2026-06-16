@@ -1,6 +1,24 @@
 version: '3.9'
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: masjid-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: masjid
+      POSTGRES_USER: masjid
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-masjid_secret_2024}
+    volumes:
+      - masjid-pgdata:/var/lib/postgresql/data
+    networks:
+      - masjid-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U masjid"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build: ./backend
     container_name: masjid-backend
@@ -8,9 +26,11 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - JWT_SECRET=ganti_dengan_secret_yang_kuat_min32char
-    volumes:
-      - masjid-db:/app/data
+      - JWT_SECRET=${JWT_SECRET:-ganti_dengan_secret_yang_kuat_min32char}
+      - DATABASE_URL=postgresql://masjid:${POSTGRES_PASSWORD:-masjid_secret_2024}@postgres:5432/masjid
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - masjid-net
 
@@ -36,7 +56,7 @@ services:
       - masjid-net
 
 volumes:
-  masjid-db:
+  masjid-pgdata:
 
 networks:
   masjid-net:
