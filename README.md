@@ -1,3 +1,4 @@
+HEAD
 # 🕌 Sistem Manajemen Masjid Jogokariyan
 
 Aplikasi manajemen internal untuk Takmir Masjid Jogokariyan.  
@@ -178,3 +179,7 @@ cd frontend
 npm install
 npm run dev      # berjalan di port 5173
 ```
+
+# takmir
+Aplikasi Takmir Masjid
+ee6c87fc73c454c25b64248d93b80ab2f237f4bb
