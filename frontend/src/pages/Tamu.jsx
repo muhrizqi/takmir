@@ -66,25 +66,23 @@ function generateTabelCanvas(rows, dari, sampai) {
   ctx.fillRect(0, 0, W, TITLE_H)
 
   ctx.fillStyle = '#F8FAFC'
-  ctx.font = 'bold 22px Arial'
+  ctx.font = 'bold 28px Arial'
   ctx.textAlign = 'center'
-  ctx.fillText('JADWAL TAMU MANAJEMEN MASJID JOGOKARIYAN', W / 2, 30)
+  ctx.fillText('JADWAL TAMU MANAJEMEN MASJID JOGOKARIYAN', W / 2, 32)
   ctx.fillStyle = '#64748B'
-  ctx.font = '13px Arial'
+  ctx.font = '16px Arial'
   const periode = dari && sampai ? `Periode: ${fmtTgl(dari)}  —  ${fmtTgl(sampai)}` : ''
-  ctx.fillText(periode, W / 2, 52)
+  ctx.fillText(periode, W / 2, 56)
 
-  // Kolom
+  // Kolom — tanpa Ruangan dan CP/WA
   const cols = [
-    { label: 'HARI',       w: 90  },
-    { label: 'TGL',        w: 72  },
-    { label: 'JAM',        w: 60  },
-    { label: 'ROMBONGAN',  w: 430 },
-    { label: 'RUANGAN',    w: 200 },
-    { label: 'JML',        w: 55  },
-    { label: 'KETERANGAN', w: 175 },
-    { label: 'PEMATERI',   w: 195 },
-    { label: 'CP / WA',    w: 223 },
+    { label: 'HARI',       w: 120 },
+    { label: 'TGL',        w: 100 },
+    { label: 'JAM',        w: 80  },
+    { label: 'ROMBONGAN',  w: 720 },
+    { label: 'JML',        w: 80  },
+    { label: 'KETERANGAN', w: 220 },
+    { label: 'PEMATERI',   w: 180 },
   ]
   let xAcc = 0
   cols.forEach(c => { c.x = xAcc; xAcc += c.w })
@@ -95,10 +93,10 @@ function generateTabelCanvas(rows, dari, sampai) {
   ctx.fillRect(0, hy, W, HEADER_H)
 
   ctx.fillStyle = '#E2E8F0'
-  ctx.font = 'bold 12px Arial'
+  ctx.font = 'bold 16px Arial'
   ctx.textAlign = 'center'
   cols.forEach(c => {
-    ctx.fillText(c.label, c.x + c.w / 2, hy + HEADER_H / 2 + 5)
+    ctx.fillText(c.label, c.x + c.w / 2, hy + HEADER_H / 2 + 6)
     ctx.strokeStyle = '#334155'
     ctx.lineWidth = 0.8
     ctx.beginPath(); ctx.moveTo(c.x, hy); ctx.lineTo(c.x, hy + HEADER_H); ctx.stroke()
@@ -121,20 +119,14 @@ function generateTabelCanvas(rows, dari, sampai) {
     ctx.lineWidth = 1
     ctx.beginPath(); ctx.moveTo(0, y + ROW_H); ctx.lineTo(W, y + ROW_H); ctx.stroke()
 
-    const ruanganLabel = row.ruangan_name
-      ? `${row.ruangan_name}${row.ruangan_lantai ? ' (Lt '+row.ruangan_lantai+')' : ''}`
-      : ''
-
     const vals = [
       row.hari,
       fmtTglShort(row.tanggal),
       row.jam,
       row.rombongan,
-      ruanganLabel,
       row.jumlah > 0 ? String(row.jumlah) : '',
       row.keterangan,
       row.pemateri || '',
-      [row.cp_nama, row.cp_wa].filter(Boolean).join(' / ') || '',
     ]
 
     ctx.fillStyle = warna.text
@@ -142,10 +134,10 @@ function generateTabelCanvas(rows, dari, sampai) {
 
     vals.forEach((val, ci) => {
       const c = cols[ci]
-      const leftAlign = [3, 4, 7, 8].includes(ci)
+      const leftAlign = [3, 6].includes(ci)
       if (leftAlign) {
         ctx.textAlign = 'left'
-        ctx.font = ci === 3 ? 'bold 12px Arial' : '11px Arial'
+        ctx.font = ci === 3 ? 'bold 16px Arial' : '15px Arial'
         let txt = val
         const maxW = c.w - 14
         while (ctx.measureText(txt).width > maxW && txt.length > 1) txt = txt.slice(0, -1)
@@ -154,8 +146,8 @@ function generateTabelCanvas(rows, dari, sampai) {
         ctx.textAlign = 'center'
         ctx.font = 'bold 12px Arial'
       } else {
-        ctx.font = 'bold 12px Arial'
-        ctx.fillText(val, c.x + c.w / 2, y + ROW_H / 2 + 5)
+        ctx.font = 'bold 16px Arial'
+        ctx.fillText(val, c.x + c.w / 2, y + ROW_H / 2 + 6)
       }
       ctx.strokeStyle = 'rgba(255,255,255,0.07)'
       ctx.lineWidth = 0.5
@@ -171,11 +163,11 @@ function generateTabelCanvas(rows, dari, sampai) {
   ctx.fillStyle = fGrad
   ctx.fillRect(0, fy, W, FOOTER_H)
 
-  ctx.fillStyle = '#94A3B8'; ctx.font = '12px Arial'; ctx.textAlign = 'left'
+  ctx.fillStyle = '#94A3B8'; ctx.font = '14px Arial'; ctx.textAlign = 'left'
   ctx.fillText(`Total rombongan: ${rows.length}`, 16, fy + FOOTER_H / 2 + 5)
-  ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 15px Arial'; ctx.textAlign = 'center'
+  ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 18px Arial'; ctx.textAlign = 'center'
   ctx.fillText(`TOTAL JAMAAH: ${totalJml.toLocaleString('id-ID')}`, W / 2, fy + FOOTER_H / 2 + 5)
-  ctx.fillStyle = '#475569'; ctx.font = '11px Arial'; ctx.textAlign = 'right'
+  ctx.fillStyle = '#475569'; ctx.font = '13px Arial'; ctx.textAlign = 'right'
   ctx.fillText('Manajemen Masjid Jogokariyan', W - 16, fy + FOOTER_H / 2 + 5)
 
   return canvas
@@ -622,7 +614,7 @@ export default function Tamu() {
               {!genLoading && genRows.length === 0 && !previewUrl && (
                 <p className="text-sm text-gray-400">Pilih rentang tanggal lalu klik "Tampilkan"</p>
               )}
-              {!genLoading && genRows.length === 0 && previewUrl === null && (
+              {!genLoading && genRows.length === 0 && previewUrl === null && genRows !== [] && (
                 <p className="text-sm text-gray-400">Tidak ada data pada periode ini.</p>
               )}
               {activeTab === 'gambar' && !genLoading && previewUrl && (
