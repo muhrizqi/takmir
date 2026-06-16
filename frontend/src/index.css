@@ -7,11 +7,20 @@
     @apply bg-gray-50 text-gray-900 antialiased;
     font-family: 'Inter', system-ui, sans-serif;
   }
+  /* Prevent zoom on input focus iOS */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  @media (min-width: 640px) {
+    input, select, textarea {
+      font-size: 14px !important;
+    }
+  }
 }
 
 @layer components {
   .btn {
-    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium cursor-pointer transition-colors bg-white hover:bg-gray-50 disabled:opacity-50;
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium cursor-pointer transition-colors bg-white hover:bg-gray-50 disabled:opacity-50 active:scale-95;
   }
   .btn-primary {
     @apply bg-masjid-400 text-white border-masjid-400 hover:bg-masjid-600;
@@ -23,7 +32,7 @@
     @apply bg-white border border-gray-100 rounded-xl p-4;
   }
   .input {
-    @apply w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-masjid-400 focus:border-transparent;
+    @apply w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-masjid-400 focus:border-transparent;
   }
   .label {
     @apply block text-xs font-medium text-gray-500 mb-1;
@@ -31,32 +40,8 @@
   .badge {
     @apply inline-block text-xs px-2 py-0.5 rounded-full font-medium;
   }
-
-  .bottom-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-2 md:hidden;
-  }
-  .bottom-nav-item {
-    @apply flex flex-col items-center text-xs text-gray-500 hover:text-masjid-600 transition-colors;
-  }
-  .bottom-nav-item-active {
-    @apply text-masjid-600 font-medium;
-  }
-
-  /* Sidebar responsif */
-  .sidebar {
-    @apply w-52 bg-white border-r border-gray-100 flex flex-col flex-shrink-0;
-  }
-  @media (max-width: 768px) {
-    .sidebar {
-      @apply w-full h-auto border-b;
-    }
-    .nav-link {
-      @apply flex-1 text-center;
-    }
-  }
-
-  /* Main content */
-  .main-content {
-    @apply flex-1 overflow-y-auto;
+  /* Mobile tap area lebih besar */
+  .tap-target {
+    @apply min-h-[44px] min-w-[44px];
   }
 }

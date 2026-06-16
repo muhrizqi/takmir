@@ -5,12 +5,10 @@ import { Plus, Trash2, Search } from 'lucide-react'
 function today() { return new Date().toISOString().split('T')[0] }
 function bulanIni() { return new Date().toISOString().substring(0,7) }
 
-// ── Shared components ──────────────────────────────────────────────────────────
-
 function PageHeader({ title, action }) {
   return (
     <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-      <h1 className="text-lg font-semibold text-gray-800">{title}</h1>
+      <h1 className="text-base md:text-lg font-semibold text-gray-800">{title}</h1>
       {action}
     </div>
   )
@@ -19,8 +17,8 @@ function PageHeader({ title, action }) {
 function Modal({ open, onClose, title, children }) {
   if (!open) return null
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-5 w-full max-w-md">
+    <div className="fixed inset-0 bg-black/30 flex items-end md:items-center justify-center z-50 p-0 md:p-4">
+      <div className="bg-white rounded-t-2xl md:rounded-2xl shadow-xl p-5 w-full md:max-w-md max-h-[90vh] overflow-y-auto">
         <h3 className="font-semibold text-gray-800 mb-3">{title}</h3>
         {children}
       </div>
@@ -48,30 +46,84 @@ export function Kegiatan() {
     catch(e) { setErr(e.message) }
   }
 
+  const grouped = items.reduce((acc, k) => {
+    if (!acc[k.tanggal]) acc[k.tanggal] = []
+    acc[k.tanggal].push(k); return acc
+  }, {})
+
   return (
-    <div className="p-6">
-      <PageHeader title="Kegiatan" action={
+    <div className="p-4 md:p-6">
+      <PageHeader title="Kegiatan & Agenda" action={
         <div className="flex gap-2 items-center">
           <input type="month" className="input text-sm" value={bulan} onChange={e => setBulan(e.target.value)} style={{width:'auto'}} />
-          <button className="btn btn-primary" onClick={() => setModal(true)}><Plus size={14} /> Tambah</button>
+          <button className="btn btn-primary" onClick={() => setModal(true)}><Plus size={14}/> Tambah</button>
         </div>
-      } />
-      <div className="space-y-2">
-        {items.length === 0 && <p className="text-sm text-gray-400">Belum ada kegiatan bulan ini.</p>}
-        {items.map(k => (
-          <div key={k.id} className="card flex items-start gap-3">
-            <div className="w-10 h-10 bg-blue-50 rounded-xl flex flex-col items-center justify-center flex-shrink-0">
-              <span className="text-sm font-semibold text-blue-500">{new Date(k.tanggal+'T00:00:00').getDate()}</span>
-              <span className="text-[9px] text-blue-300">{new Date(k.tanggal+'T00:00:00').toLocaleDateString('id-ID',{month:'short'})}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-800">{k.name}</p>
-              <p className="text-xs text-gray-400">{k.waktu} · {k.biro_name || 'Takmir'}{k.catatan ? ' — '+k.catatan : ''}</p>
-            </div>
-            <button className="btn hover:bg-red-50 hover:text-red-500" onClick={async () => { await api.deleteKegiatan(k.id); load() }}><Trash2 size={13}/></button>
-          </div>
-        ))}
+      }/>
+
+      <div className="flex gap-3 mb-4 text-xs text-gray-500">
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-400 inline-block"></span> Kegiatan</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-400 inline-block"></span> Kunjungan Tamu</span>
       </div>
+
+      {Object.keys(grouped).length === 0 && (
+        <p className="text-sm text-gray-400 py-8 text-center">Belum ada kegiatan bulan ini.</p>
+      )}
+
+      {Object.keys(grouped).sort().map(tgl => (
+        <div key={tgl} className="mb-5">
+          <p className="text-xs font-semibold text-gray-400 mb-2 flex items-center gap-2">
+            <span className="h-px flex-1 bg-gray-100"></span>
+            {new Date(tgl+'T00:00:00').toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'})}
+            <span className="h-px flex-1 bg-gray-100"></span>
+          </p>
+          <div className="space-y-2">
+            {grouped[tgl].map(k => {
+              const isTamu = k.sumber === 'tamu'
+              const borderColor = isTamu ? 'border-l-orange-400' : 'border-l-blue-400'
+              const iconBg = isTamu ? 'bg-orange-50' : 'bg-blue-50'
+              const iconText = isTamu ? 'text-orange-500' : 'text-blue-500'
+              const iconSub = isTamu ? 'text-orange-300' : 'text-blue-300'
+              return (
+                <div key={(isTamu?'t':'k')+k.id} className={'card flex items-start gap-3 border-l-4 ' + borderColor}>
+                  <div className={'w-10 h-10 rounded-xl flex flex-col items-center justify-center flex-shrink-0 ' + iconBg}>
+                    <span className={'text-sm font-semibold ' + iconText}>
+                      {new Date(k.tanggal+'T00:00:00').getDate()}
+                    </span>
+                    <span className={'text-[9px] ' + iconSub}>
+                      {new Date(k.tanggal+'T00:00:00').toLocaleDateString('id-ID',{month:'short'})}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-medium text-gray-800">{k.name}</p>
+                      {isTamu && (
+                        <span className="text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">
+                          {k.keterangan || k.catatan || 'Kunjungan'}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {k.waktu}
+                      {isTamu && k.jumlah > 0 ? ' · '+k.jumlah+' orang' : ''}
+                      {isTamu && k.pemateri ? ' · '+k.pemateri : ''}
+                      {isTamu && k.ruangan_name ? ' · '+k.ruangan_name : ''}
+                      {!isTamu ? ' · '+(k.biro_name||'Takmir') : ''}
+                      {k.catatan && !isTamu ? ' — '+k.catatan : ''}
+                    </p>
+                  </div>
+                  {!isTamu && (
+                    <button className="btn hover:bg-red-50 hover:text-red-500 flex-shrink-0"
+                      onClick={async () => { await api.deleteKegiatan(k.id); load() }}>
+                      <Trash2 size={13}/>
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      ))}
+
       <Modal open={modal} onClose={() => setModal(false)} title="Tambah kegiatan">
         <div className="space-y-3">
           <div><label className="label">Nama kegiatan</label><input className="input" value={form.name} onChange={e => setForm(f=>({...f,name:e.target.value}))} /></div>
@@ -109,7 +161,7 @@ export function Pemesanan() {
   }, {})
 
   return (
-    <div className="p-6">
+    <div className="p-4 md:p-6">
       <PageHeader title="Semua pemesanan" action={
         <input type="month" className="input text-sm" value={bulan} onChange={e => setBulan(e.target.value)} style={{width:'auto'}} />
       } />
@@ -122,15 +174,18 @@ export function Pemesanan() {
             <div key={p.id} className="card mb-2 flex items-start gap-3">
               <div className="w-1 min-h-[40px] rounded bg-masjid-400 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800">{p.name}</p>
+                <p className="text-sm font-medium text-gray-800 truncate">{p.name}</p>
                 <p className="text-xs text-gray-400">{p.ruangan_name} · Lt {p.lantai} · {p.mulai}–{p.selesai} · {p.biro_name||'Takmir'}</p>
               </div>
-              <button className="btn hover:bg-red-50 hover:text-red-500" onClick={async()=>{await api.deletePemesanan(p.id);setItems(i=>i.filter(x=>x.id!==p.id))}}><Trash2 size={13}/></button>
+              <button className="btn hover:bg-red-50 hover:text-red-500 flex-shrink-0"
+                onClick={async()=>{await api.deletePemesanan(p.id);setItems(i=>i.filter(x=>x.id!==p.id))}}>
+                <Trash2 size={13}/>
+              </button>
             </div>
           ))}
         </div>
       ))}
-      {items.length === 0 && <p className="text-sm text-gray-400">Belum ada pemesanan bulan ini.</p>}
+      {items.length === 0 && <p className="text-sm text-gray-400 py-8 text-center">Belum ada pemesanan bulan ini.</p>}
     </div>
   )
 }
@@ -158,7 +213,7 @@ export function Keuangan() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 md:p-6">
       <PageHeader title="Keuangan" action={
         <div className="flex gap-2">
           <input type="month" className="input text-sm" value={bulan} onChange={e=>setBulan(e.target.value)} style={{width:'auto'}} />
@@ -166,15 +221,15 @@ export function Keuangan() {
         </div>
       } />
 
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      <div className="grid grid-cols-3 gap-2 md:gap-3 mb-5">
         {[
-          {label:'Total masuk', val:data.total_masuk, color:'bg-masjid-50 text-masjid-600'},
-          {label:'Total keluar', val:data.total_keluar, color:'bg-red-50 text-red-600'},
+          {label:'Masuk', val:data.total_masuk, color:'bg-masjid-50 text-masjid-600'},
+          {label:'Keluar', val:data.total_keluar, color:'bg-red-50 text-red-600'},
           {label:'Saldo', val:data.saldo, color:'bg-blue-50 text-blue-600'},
         ].map(s => (
-          <div key={s.label} className={`rounded-xl p-4 ${s.color}`}>
+          <div key={s.label} className={'rounded-xl p-3 md:p-4 '+s.color}>
             <p className="text-xs font-medium opacity-70">{s.label}</p>
-            <p className="text-xl font-semibold mt-1">Rp {rp(s.val)}</p>
+            <p className="text-base md:text-xl font-semibold mt-1">Rp {rp(s.val)}</p>
           </div>
         ))}
       </div>
@@ -182,18 +237,19 @@ export function Keuangan() {
       <div className="space-y-2">
         {data.transaksi.map(t => (
           <div key={t.id} className="card flex items-center gap-3">
-            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${t.tipe==='masuk'?'bg-masjid-400':'bg-red-400'}`} />
+            <div className={'w-2 h-2 rounded-full flex-shrink-0 '+(t.tipe==='masuk'?'bg-masjid-400':'bg-red-400')} />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-800 truncate">{t.keterangan}</p>
               <p className="text-xs text-gray-400">{t.tanggal} · {t.biro_name||'Takmir'}</p>
             </div>
-            <p className={`text-sm font-semibold flex-shrink-0 ${t.tipe==='masuk'?'text-masjid-600':'text-red-500'}`}>
+            <p className={'text-sm font-semibold flex-shrink-0 '+(t.tipe==='masuk'?'text-masjid-600':'text-red-500')}>
               {t.tipe==='masuk'?'+':'-'} Rp {rp(t.jumlah)}
             </p>
-            <button className="btn hover:bg-red-50 hover:text-red-500" onClick={async()=>{await api.deleteKeuangan(t.id);load()}}><Trash2 size={13}/></button>
+            <button className="btn hover:bg-red-50 hover:text-red-500 flex-shrink-0"
+              onClick={async()=>{await api.deleteKeuangan(t.id);load()}}><Trash2 size={13}/></button>
           </div>
         ))}
-        {data.transaksi.length === 0 && <p className="text-sm text-gray-400">Belum ada transaksi.</p>}
+        {data.transaksi.length === 0 && <p className="text-sm text-gray-400 py-8 text-center">Belum ada transaksi.</p>}
       </div>
 
       <Modal open={modal} onClose={()=>setModal(false)} title="Catat transaksi">
@@ -203,7 +259,7 @@ export function Keuangan() {
             <div className="flex gap-2">
               {['masuk','keluar'].map(t => (
                 <button key={t} onClick={()=>setForm(f=>({...f,tipe:t}))}
-                  className={`flex-1 py-2 rounded-lg text-sm border transition-colors ${form.tipe===t?'bg-masjid-400 text-white border-masjid-400':'border-gray-200 text-gray-600'}`}>
+                  className={'flex-1 py-2.5 rounded-lg text-sm border transition-colors '+(form.tipe===t?'bg-masjid-400 text-white border-masjid-400':'border-gray-200 text-gray-600')}>
                   {t.charAt(0).toUpperCase()+t.slice(1)}
                 </button>
               ))}
@@ -246,24 +302,25 @@ export function Pengumuman() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 md:p-6">
       <PageHeader title="Pengumuman" action={
-        <button className="btn btn-primary" onClick={()=>setModal(true)}><Plus size={14}/> Buat pengumuman</button>
+        <button className="btn btn-primary" onClick={()=>setModal(true)}><Plus size={14}/> Buat</button>
       } />
       <div className="space-y-3">
         {items.map(p => (
           <div key={p.id} className="card">
             <div className="flex items-start justify-between gap-2">
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-semibold text-gray-800">{p.judul}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{p.tanggal} · {p.biro_name || 'Takmir'}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{p.tanggal} · {p.biro_name||'Takmir'}</p>
               </div>
-              <button className="btn hover:bg-red-50 hover:text-red-500 flex-shrink-0" onClick={async()=>{await api.deletePengumuman(p.id);load()}}><Trash2 size={13}/></button>
+              <button className="btn hover:bg-red-50 hover:text-red-500 flex-shrink-0"
+                onClick={async()=>{await api.deletePengumuman(p.id);load()}}><Trash2 size={13}/></button>
             </div>
             <p className="text-sm text-gray-600 mt-2 whitespace-pre-wrap">{p.isi}</p>
           </div>
         ))}
-        {items.length === 0 && <p className="text-sm text-gray-400">Belum ada pengumuman.</p>}
+        {items.length === 0 && <p className="text-sm text-gray-400 py-8 text-center">Belum ada pengumuman.</p>}
       </div>
       <Modal open={modal} onClose={()=>setModal(false)} title="Buat pengumuman">
         <div className="space-y-3">
@@ -289,7 +346,6 @@ export function Pengumuman() {
 export function Pengurus() {
   const [data, setData] = useState([])
   const [q, setQ] = useState('')
-  const [selected, setSelected] = useState(null)
   const [detail, setDetail] = useState(null)
 
   useEffect(() => { api.getBiro().then(setData) }, [])
@@ -305,13 +361,12 @@ export function Pengurus() {
   })).filter(bd => bd.biros.length > 0)
 
   return (
-    <div className="p-6">
+    <div className="p-4 md:p-6">
       <PageHeader title="Pengurus & Biro" />
       <div className="relative mb-4">
         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input className="input pl-8" placeholder="Cari nama biro atau anggota..." value={q} onChange={e=>setQ(e.target.value)} />
+        <input className="input pl-8" placeholder="Cari nama biro..." value={q} onChange={e=>setQ(e.target.value)} />
       </div>
-
       <div className="space-y-5">
         {filtered.map(bd => (
           <div key={bd.id}>
@@ -322,7 +377,7 @@ export function Pengurus() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               {bd.biros.map(b => (
                 <button key={b.id} onClick={()=>openDetail(b.id)}
-                  className="card text-left hover:border-masjid-100 hover:shadow-sm transition-all flex items-start gap-2">
+                  className="card text-left hover:border-masjid-100 hover:shadow-sm transition-all flex items-start gap-2 active:scale-95">
                   <span className="text-xs font-bold text-masjid-400 bg-masjid-50 rounded px-1.5 py-0.5 flex-shrink-0 mt-0.5">{b.id}</span>
                   <div>
                     <p className="text-sm font-medium text-gray-800 leading-snug">{b.name}</p>
@@ -336,8 +391,8 @@ export function Pengurus() {
       </div>
 
       {detail && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-5 w-full max-w-md max-h-[80vh] flex flex-col">
+        <div className="fixed inset-0 bg-black/30 flex items-end md:items-center justify-center z-50">
+          <div className="bg-white rounded-t-2xl md:rounded-2xl shadow-xl p-5 w-full md:max-w-md max-h-[80vh] flex flex-col">
             <div className="flex justify-between items-start mb-3">
               <div>
                 <h3 className="font-semibold text-gray-800">Biro {detail.name}</h3>
@@ -346,9 +401,9 @@ export function Pengurus() {
               <button className="btn" onClick={()=>setDetail(null)}>✕</button>
             </div>
             <div className="overflow-y-auto flex-1">
-              <p className="text-xs font-medium text-gray-500 mb-2">Anggota ({detail.anggota?.length || 0})</p>
+              <p className="text-xs font-medium text-gray-500 mb-2">Anggota ({detail.anggota?.length||0})</p>
               <div className="flex flex-wrap gap-1.5">
-                {(detail.anggota || []).map(a => (
+                {(detail.anggota||[]).map(a => (
                   <span key={a.id} className="badge bg-gray-100 text-gray-700">{a.nama}</span>
                 ))}
               </div>

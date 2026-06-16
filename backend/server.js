@@ -123,16 +123,41 @@ app.put('/api/pemesanan/:id', auth, (req, res) => {
 
 app.get('/api/kegiatan', auth, (req, res) => {
   const { bulan, tanggal } = req.query;
-  let query = `
-    SELECT k.*, b.name as biro_name
+
+  // Query kegiatan biasa
+  let q1 = `
+    SELECT k.id, k.name, k.tanggal, k.waktu, k.catatan, b.name as biro_name,
+           'kegiatan' as sumber
     FROM kegiatan k LEFT JOIN biro b ON b.id = k.biro_id
   `;
-  const conds = [], params = [];
-  if (tanggal) { conds.push('k.tanggal=?'); params.push(tanggal); }
-  if (bulan) { conds.push("strftime('%Y-%m', k.tanggal)=?"); params.push(bulan); }
-  if (conds.length) query += ' WHERE ' + conds.join(' AND ');
-  query += ' ORDER BY k.tanggal, k.waktu';
-  res.json(db.prepare(query).all(...params));
+  const conds1 = [], params1 = [];
+  if (tanggal) { conds1.push('k.tanggal=?'); params1.push(tanggal); }
+  if (bulan) { conds1.push("strftime('%Y-%m', k.tanggal)=?"); params1.push(bulan); }
+  if (conds1.length) q1 += ' WHERE ' + conds1.join(' AND ');
+
+  // Query tamu sebagai kegiatan
+  let q2 = `
+    SELECT t.id, t.rombongan as name, t.tanggal, t.jam as waktu,
+           t.keterangan as catatan, 'Manajemen Masjid' as biro_name,
+           'tamu' as sumber, t.jumlah, t.pemateri,
+           t.keterangan, t.hari, r.name as ruangan_name
+    FROM tamu t LEFT JOIN ruangan r ON r.id = t.ruangan_id
+  `;
+  const conds2 = [], params2 = [];
+  if (tanggal) { conds2.push('t.tanggal=?'); params2.push(tanggal); }
+  if (bulan) { conds2.push("strftime('%Y-%m', t.tanggal)=?"); params2.push(bulan); }
+  if (conds2.length) q2 += ' WHERE ' + conds2.join(' AND ');
+
+  const kegiatan = db.prepare(q1 + ' ORDER BY k.tanggal, k.waktu').all(...params1);
+  const tamu = db.prepare(q2 + ' ORDER BY t.tanggal, t.jam').all(...params2);
+
+  // Gabung dan sort
+  const result = [...kegiatan, ...tamu].sort((a, b) => {
+    if (a.tanggal !== b.tanggal) return a.tanggal.localeCompare(b.tanggal);
+    return (a.waktu || '').localeCompare(b.waktu || '');
+  });
+
+  res.json(result);
 });
 
 app.post('/api/kegiatan', auth, (req, res) => {
