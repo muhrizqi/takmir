@@ -1,4 +1,4 @@
-const BASE = '/api';
+const BASE = 'https://api.takmir.lewat.web.id/api';
 
 function getToken() {
   return localStorage.getItem('token');
