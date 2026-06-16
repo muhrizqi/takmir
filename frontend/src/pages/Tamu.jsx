@@ -622,7 +622,7 @@ export default function Tamu() {
               {!genLoading && genRows.length === 0 && !previewUrl && (
                 <p className="text-sm text-gray-400">Pilih rentang tanggal lalu klik "Tampilkan"</p>
               )}
-              {!genLoading && genRows.length === 0 && previewUrl === null && genRows !== [] && (
+              {!genLoading && genRows.length === 0 && previewUrl === null && (
                 <p className="text-sm text-gray-400">Tidak ada data pada periode ini.</p>
               )}
               {activeTab === 'gambar' && !genLoading && previewUrl && (
