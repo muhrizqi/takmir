@@ -258,3 +258,44 @@ app.get('/api/dashboard', auth, (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`Masjid API berjalan di port ${PORT}`));
+
+// ── TAMU ──────────────────────────────────────────────────────────────────────
+
+app.get('/api/tamu', auth, (req, res) => {
+  const { dari, sampai, bulan } = req.query;
+  let query = `
+    SELECT t.*, r.name as ruangan_name, r.lantai as ruangan_lantai
+    FROM tamu t LEFT JOIN ruangan r ON r.id = t.ruangan_id
+  `;
+  const conds = [], params = [];
+  if (dari) { conds.push('t.tanggal >= ?'); params.push(dari); }
+  if (sampai) { conds.push('t.tanggal <= ?'); params.push(sampai); }
+  if (bulan) { conds.push("strftime('%Y-%m', t.tanggal) = ?"); params.push(bulan); }
+  if (conds.length) query += ' WHERE ' + conds.join(' AND ');
+  query += ' ORDER BY t.tanggal ASC, t.jam ASC';
+  res.json(db.prepare(query).all(...params));
+});
+
+app.post('/api/tamu', auth, (req, res) => {
+  const { hari, tanggal, jam, rombongan, jumlah, keterangan, pemateri, ruangan_id, cp_nama, cp_wa, catatan } = req.body;
+  if (!hari || !tanggal || !jam || !rombongan)
+    return res.status(400).json({ error: 'Field wajib: hari, tanggal, jam, rombongan' });
+  const result = db.prepare(`
+    INSERT INTO tamu (hari,tanggal,jam,rombongan,jumlah,keterangan,pemateri,ruangan_id,cp_nama,cp_wa,catatan)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?)
+  `).run(hari, tanggal, jam, rombongan, jumlah||0, keterangan||'STUDI BANDING', pemateri||'', ruangan_id||'', cp_nama||'', cp_wa||'', catatan||'');
+  res.status(201).json({ id: result.lastInsertRowid });
+});
+
+app.put('/api/tamu/:id', auth, (req, res) => {
+  const { hari, tanggal, jam, rombongan, jumlah, keterangan, pemateri, ruangan_id, cp_nama, cp_wa, catatan } = req.body;
+  db.prepare(`
+    UPDATE tamu SET hari=?,tanggal=?,jam=?,rombongan=?,jumlah=?,keterangan=?,pemateri=?,ruangan_id=?,cp_nama=?,cp_wa=?,catatan=? WHERE id=?
+  `).run(hari, tanggal, jam, rombongan, jumlah||0, keterangan||'STUDI BANDING', pemateri||'', ruangan_id||'', cp_nama||'', cp_wa||'', catatan||'', req.params.id);
+  res.json({ message: 'Berhasil diperbarui' });
+});
+
+app.delete('/api/tamu/:id', auth, (req, res) => {
+  db.prepare('DELETE FROM tamu WHERE id=?').run(req.params.id);
+  res.json({ message: 'Berhasil dihapus' });
+});

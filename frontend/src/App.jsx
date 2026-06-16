@@ -10,6 +10,7 @@ import Pemesanan from './pages/Pemesanan'
 import Keuangan from './pages/Keuangan'
 import Pengumuman from './pages/Pengumuman'
 import Pengurus from './pages/Pengurus'
+import Tamu from './pages/Tamu'
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('token')
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="keuangan" element={<Keuangan />} />
         <Route path="pengumuman" element={<Pengumuman />} />
         <Route path="pengurus" element={<Pengurus />} />
+        <Route path="tamu" element={<Tamu />} />
       </Route>
     </Routes>
   )

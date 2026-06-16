@@ -1,8 +1,9 @@
 import React from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, Calendar, CalendarDays, DoorOpen, ClipboardList,
-  Wallet, Megaphone, Users, LogOut, Building2
+  LayoutDashboard, CalendarDays, Calendar, DoorOpen,
+  ClipboardList, Wallet, Megaphone, Users, LogOut,
+  Building2, UserCheck
 } from 'lucide-react'
 
 const navItems = [
@@ -11,6 +12,7 @@ const navItems = [
   { to: '/kegiatan',   icon: Calendar,        label: 'Kegiatan' },
   { to: '/ruangan',    icon: DoorOpen,        label: 'Ruangan' },
   { to: '/pemesanan',  icon: ClipboardList,   label: 'Pemesanan' },
+  { to: '/tamu',       icon: UserCheck,       label: 'Tamu Masjid' },
   { to: '/keuangan',   icon: Wallet,          label: 'Keuangan' },
   { to: '/pengumuman', icon: Megaphone,       label: 'Pengumuman' },
   { to: '/pengurus',   icon: Users,           label: 'Pengurus & Biro' },
@@ -41,17 +43,14 @@ export default function Layout() {
 
         <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
           {navItems.map(({ to, icon: Icon, label }) => (
-            <NavLink
-              key={to}
-              to={to}
+            <NavLink key={to} to={to}
               className={({ isActive }) =>
                 `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
                   isActive
                     ? 'bg-masjid-50 text-masjid-600 font-medium'
                     : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
                 }`
-              }
-            >
+              }>
               <Icon size={15} />
               {label}
             </NavLink>

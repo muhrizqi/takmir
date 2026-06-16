@@ -41,6 +41,7 @@ function initDB() {
       biro_id INTEGER,
       tanggal TEXT NOT NULL,
       waktu TEXT NOT NULL,
+      ruangan_id TEXT DEFAULT '',
       catatan TEXT DEFAULT '',
       created_at TEXT DEFAULT (datetime('now','localtime'))
     );
@@ -54,6 +55,7 @@ function initDB() {
       mulai TEXT NOT NULL,
       selesai TEXT NOT NULL,
       pic TEXT DEFAULT '',
+      ruangan_id TEXT DEFAULT '',
       catatan TEXT DEFAULT '',
       created_at TEXT DEFAULT (datetime('now','localtime')),
       FOREIGN KEY (ruangan_id) REFERENCES ruangan(id)
@@ -75,6 +77,22 @@ function initDB() {
       isi TEXT NOT NULL,
       biro_id INTEGER,
       tanggal TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now','localtime'))
+    );
+
+    CREATE TABLE IF NOT EXISTS tamu (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      hari TEXT NOT NULL,
+      tanggal TEXT NOT NULL,
+      jam TEXT NOT NULL,
+      rombongan TEXT NOT NULL,
+      jumlah INTEGER DEFAULT 0,
+      keterangan TEXT DEFAULT 'STUDI BANDING',
+      pemateri TEXT DEFAULT '',
+      cp_nama TEXT DEFAULT '',
+      cp_wa TEXT DEFAULT '',
+      ruangan_id TEXT DEFAULT '',
+      catatan TEXT DEFAULT '',
       created_at TEXT DEFAULT (datetime('now','localtime'))
     );
 
@@ -155,6 +173,7 @@ function seedData(db) {
 
     insertUser.run('admin','admin123','admin');
     insertUser.run('takmir','takmir123','operator');
+    insertUser.run('manajemen','manajemen123','manajemen');
   });
 
   seedAll();

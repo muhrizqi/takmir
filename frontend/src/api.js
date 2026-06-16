@@ -59,4 +59,12 @@ export const api = {
   getPengumuman: () => req('GET', '/pengumuman'),
   createPengumuman: (body) => req('POST', '/pengumuman', body),
   deletePengumuman: (id) => req('DELETE', `/pengumuman/${id}`),
+
+  getTamu: (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return req('GET', `/tamu${q ? '?' + q : ''}`);
+  },
+  createTamu: (body) => req('POST', '/tamu', body),
+  updateTamu: (id, body) => req('PUT', `/tamu/${id}`, body),
+  deleteTamu: (id) => req('DELETE', `/tamu/${id}`),
 };
