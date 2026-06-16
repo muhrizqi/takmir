@@ -41,7 +41,6 @@ function initDB() {
       biro_id INTEGER,
       tanggal TEXT NOT NULL,
       waktu TEXT NOT NULL,
-      ruangan_id TEXT DEFAULT '',
       catatan TEXT DEFAULT '',
       created_at TEXT DEFAULT (datetime('now','localtime'))
     );
@@ -55,7 +54,6 @@ function initDB() {
       mulai TEXT NOT NULL,
       selesai TEXT NOT NULL,
       pic TEXT DEFAULT '',
-      ruangan_id TEXT DEFAULT '',
       catatan TEXT DEFAULT '',
       created_at TEXT DEFAULT (datetime('now','localtime')),
       FOREIGN KEY (ruangan_id) REFERENCES ruangan(id)
